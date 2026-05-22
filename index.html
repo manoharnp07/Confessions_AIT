@@ -1,155 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Meme Soundboard</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Space Mono',monospace;background:#0e0e0e;color:#f0f0f0;min-height:100vh;padding:2rem 1.5rem}
-  #topbar{display:flex;align-items:center;gap:12px;margin-bottom:1rem;flex-wrap:wrap}
-  #title{font-size:22px;font-weight:700;flex:1;letter-spacing:-0.5px}
-  #search-wrap{display:none;align-items:center;gap:8px;background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:6px 12px;flex:1;max-width:320px}
-  #search-wrap.open{display:flex}
-  #search-wrap input{background:none;border:none;outline:none;font-family:inherit;font-size:14px;color:#f0f0f0;width:100%}
-  #search-wrap input::placeholder{color:#555}
-  #search-close{cursor:pointer;font-size:20px;color:#888;background:none;border:none;font-family:inherit;line-height:1}
-  #hint{font-size:11px;color:#555;margin-bottom:1.25rem}
-  #hint span{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:1px 6px}
-  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-  .sound-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;cursor:pointer;transition:background 0.1s,border-color 0.1s,transform 0.08s;position:relative;overflow:hidden;color:inherit;font-family:inherit}
-  .sound-btn:hover{background:#222;border-color:#444}
-  .sound-btn.playing{border-color:#1D9E75;background:#0a2e22;transform:scale(0.97)}
-  .sound-btn .key-badge{position:absolute;top:6px;right:7px;font-size:10px;font-weight:700;color:#555;background:#111;border:1px solid #2a2a2a;border-radius:4px;padding:1px 5px}
-  .sound-btn .emoji{font-size:28px;line-height:1}
-  .sound-btn .label{font-size:11px;color:#aaa;text-align:center;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-  #no-result{font-size:13px;color:#555;padding:2rem 0;text-align:center;display:none}
-  #now-playing{margin-top:1.25rem;font-size:12px;color:#1D9E75;font-weight:700;letter-spacing:0.5px;min-height:18px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confessions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f0ede8;
+      min-height: 100vh;
+    }
+
+    #app {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.4rem;
+      font-weight: 400;
+      color: #2a2420;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .header h1 em {
+      font-style: italic;
+      color: #8b6f5e;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #9a8f87;
+      margin-top: 8px;
+      font-weight: 300;
+      letter-spacing: 0.3px;
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #7cb87c;
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding: 0 2px;
+    }
+
+    .count-badge {
+      font-size: 12px;
+      color: #9a8f87;
+    }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #8b6f5e;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: 4px 10px;
+      border-radius: 20px;
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover { background: rgba(139,111,94,0.1); }
+
+    .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: rgba(255, 252, 249, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 0.5px solid rgba(200, 185, 175, 0.55);
+      border-radius: 16px;
+      padding: 1.3rem 1.5rem;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      animation: fadeSlide 0.4s ease both;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(139,111,94,0.09);
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-text {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #2a2420;
+    }
+
+    .divider {
+      width: 22px;
+      height: 1px;
+      background: rgba(200,185,175,0.6);
+      margin: 12px 0;
+    }
+
+    .card-meta {
+      font-size: 11.5px;
+      color: #b0a49c;
+      font-weight: 300;
+      letter-spacing: 0.2px;
+    }
+
+    .skeleton-card {
+      background: rgba(255,252,249,0.72);
+      border: 0.5px solid rgba(200,185,175,0.4);
+      border-radius: 16px;
+      padding: 1.3rem 1.5rem;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(200,185,175,0.15) 25%,
+        rgba(200,185,175,0.30) 50%,
+        rgba(200,185,175,0.15) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 6px;
+      height: 13px;
+      margin-bottom: 9px;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .s-long  { width: 88%; }
+    .s-med   { width: 62%; }
+    .s-short { width: 32%; height: 10px; margin-top: 14px; }
+
+    .empty-state, .error-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    .empty-state { color: #b0a49c; }
+    .error-state { color: #c97c5e; }
+    .error-state small { color: #b0a49c; display: block; margin-top: 6px; font-size: 12px; }
+  </style>
 </head>
 <body>
-<div id="topbar">
-  <div id="title">🔊 MEME BOARD</div>
-  <div id="search-wrap">
-    <i class="ti ti-search" style="font-size:15px;color:#888"></i>
-    <input id="search-input" placeholder="search sounds…" autocomplete="off"/>
-    <button id="search-close">×</button>
+  <div id="app">
+    <div class="header">
+      <h1>anonymous <em>confessions</em></h1>
+      <p><span class="live-dot"></span>live · refreshes every 30s</p>
+    </div>
+
+    <div class="status-bar">
+      <span class="count-badge" id="count-label">Loading...</span>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+        <span id="refresh-icon">↻</span> refresh
+      </button>
+    </div>
+
+    <div class="feed" id="feed">
+      <div class="skeleton-card"><div class="skeleton s-long"></div><div class="skeleton s-med"></div><div class="skeleton s-short"></div></div>
+      <div class="skeleton-card"><div class="skeleton s-med"></div><div class="skeleton s-long"></div><div class="skeleton s-short"></div></div>
+      <div class="skeleton-card"><div class="skeleton s-long"></div><div class="skeleton s-short"></div><div class="skeleton s-short"></div></div>
+    </div>
   </div>
-</div>
-<div id="hint">Press a key to trigger sound &nbsp;<span>A–Z</span> &nbsp;|&nbsp; <span>Ctrl+F</span> to search</div>
-<div id="grid"></div>
-<div id="no-result">No memes found 💀</div>
-<div id="now-playing"></div>
 
-<script>
-const SOUNDS = [
-  {key:'a', label:'Bruh', emoji:'😑', url:'https://www.myinstants.com/media/sounds/bruh.mp3'},
-  {key:'b', label:'Oof', emoji:'😬', url:'https://www.myinstants.com/media/sounds/oof.mp3'},
-  {key:'c', label:'Sad Violin', emoji:'🎻', url:'https://www.myinstants.com/media/sounds/sad-violin.mp3'},
-  {key:'d', label:'Vine Boom', emoji:'💥', url:'https://www.myinstants.com/media/sounds/vine-boom.mp3'},
-  {key:'e', label:'Air Horn', emoji:'📯', url:'https://www.myinstants.com/media/sounds/airhorn_1.mp3'},
-  {key:'f', label:'Fart', emoji:'💨', url:'https://www.myinstants.com/media/sounds/fart-with-reverb.mp3'},
-  {key:'g', label:'Surprise', emoji:'😱', url:'https://www.myinstants.com/media/sounds/surprisemfkas.mp3'},
-  {key:'h', label:'Wow', emoji:'🤩', url:'https://www.myinstants.com/media/sounds/wow.mp3'},
-  {key:'i', label:'Trombone', emoji:'🎺', url:'https://www.myinstants.com/media/sounds/sad-trombone.mp3'},
-  {key:'j', label:'Nope', emoji:'🙅', url:'https://www.myinstants.com/media/sounds/nope.mp3'},
-  {key:'k', label:'Windows XP', emoji:'💻', url:'https://www.myinstants.com/media/sounds/windowsxp.mp3'},
-  {key:'l', label:'Laugh', emoji:'😂', url:'https://www.myinstants.com/media/sounds/mlg-airhorn.mp3'},
-  {key:'m', label:'MLG Horn', emoji:'🎮', url:'https://www.myinstants.com/media/sounds/mlg-airhorn.mp3'},
-  {key:'n', label:'Buzzer', emoji:'🔔', url:'https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3'},
-  {key:'o', label:'Clapping', emoji:'👏', url:'https://www.myinstants.com/media/sounds/clap.mp3'},
-  {key:'p', label:'Crickets', emoji:'🦗', url:'https://www.myinstants.com/media/sounds/crickets.mp3'},
-  {key:'q', label:'Yeet', emoji:'🚀', url:'https://www.myinstants.com/media/sounds/yeet.mp3'},
-  {key:'r', label:'Run', emoji:'🏃', url:'https://www.myinstants.com/media/sounds/run-1.mp3'},
-  {key:'s', label:'Siren', emoji:'🚨', url:'https://www.myinstants.com/media/sounds/alert.mp3'},
-  {key:'t', label:'Tada', emoji:'🎉', url:'https://www.myinstants.com/media/sounds/ta-da.mp3'},
-  {key:'u', label:'Uh Oh', emoji:'😳', url:'https://www.myinstants.com/media/sounds/uh-oh.mp3'},
-  {key:'v', label:'Victory', emoji:'🏆', url:'https://www.myinstants.com/media/sounds/success-fanfare-trumpets.mp3'},
-  {key:'w', label:'Whip', emoji:'🤙', url:'https://www.myinstants.com/media/sounds/whip-and-nae-nae.mp3'},
-  {key:'x', label:'Explosion', emoji:'🔥', url:'https://www.myinstants.com/media/sounds/explosion.mp3'},
-  {key:'y', label:'Yes', emoji:'✅', url:'https://www.myinstants.com/media/sounds/yes.mp3'},
-  {key:'z', label:'Zzz', emoji:'😴', url:'https://www.myinstants.com/media/sounds/zzz.mp3'},
-];
+  <script>
+    // ── CONFIG ─────────────────────────────────────────────
+    const SHEET_ID   = '1zqSyqbcaw8cC3avHNWCPaRJ1tAqP-oeDpxconkL5vfQ';
+    const SHEET_NAME = 'Sheet1';
+    // ───────────────────────────────────────────────────────
 
-const grid = document.getElementById('grid');
-const searchWrap = document.getElementById('search-wrap');
-const searchInput = document.getElementById('search-input');
-const searchClose = document.getElementById('search-close');
-const noResult = document.getElementById('no-result');
-const nowPlaying = document.getElementById('now-playing');
-let currentAudio = null;
-let currentBtn = null;
+    const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-function playSound(sound, btn) {
-  if(currentAudio){currentAudio.pause();currentAudio.currentTime=0;}
-  if(currentBtn){currentBtn.classList.remove('playing');}
-  const audio = new Audio(sound.url);
-  currentAudio = audio;
-  currentBtn = btn;
-  btn.classList.add('playing');
-  nowPlaying.textContent = '▶ ' + sound.emoji + ' ' + sound.label;
-  audio.play().catch(()=>{
-    nowPlaying.textContent = '⚠ Could not load: ' + sound.label;
-  });
-  audio.onended = ()=>{
-    btn.classList.remove('playing');
-    nowPlaying.textContent = '';
-    currentBtn = null;
-  };
-}
-
-function renderGrid(filter='') {
-  grid.innerHTML = '';
-  const q = filter.toLowerCase().trim();
-  const filtered = q ? SOUNDS.filter(s=>s.label.toLowerCase().includes(q)||s.key===q) : SOUNDS;
-  noResult.style.display = filtered.length===0?'block':'none';
-  filtered.forEach(sound=>{
-    const btn = document.createElement('button');
-    btn.className = 'sound-btn';
-    btn.innerHTML = `<span class="key-badge">${sound.key.toUpperCase()}</span><span class="emoji">${sound.emoji}</span><span class="label">${sound.label}</span>`;
-    btn.addEventListener('click',()=>playSound(sound,btn));
-    grid.appendChild(btn);
-  });
-}
-
-renderGrid();
-
-document.addEventListener('keydown', e=>{
-  if(e.ctrlKey && e.key==='f'){
-    e.preventDefault();
-    searchWrap.classList.add('open');
-    searchInput.focus();
-    return;
-  }
-  if(e.target===searchInput) return;
-  const k = e.key.toLowerCase();
-  const sound = SOUNDS.find(s=>s.key===k);
-  if(sound){
-    const btns = grid.querySelectorAll('.sound-btn');
-    const idx = SOUNDS.indexOf(sound);
-    if(btns[idx]) playSound(sound, btns[idx]);
-  }
-});
-
-searchInput.addEventListener('input',()=>renderGrid(searchInput.value));
-searchClose.addEventListener('click',()=>{
-  searchWrap.classList.remove('open');
-  searchInput.value='';
-  renderGrid();
-});
-searchInput.addEventListener('keydown',e=>{
-  if(e.key==='Escape') searchClose.click();
-  if(e.key==='Enter'){
-    const q = searchInput.value.toLowerCase().trim();
-    const match = SOUNDS.find(s=>s.label.toLowerCase().includes(q)||s.key===q);
-    if(match){
-      const btns = grid.querySelectorAll('.sound-btn');
-      if(btns[0]) playSound(match,btns[0]);
+    function parseGVizDate(cell) {
+      if (!cell) return '';
+      if (cell.type === 'datetime' || cell.type === 'date') {
+        const m = String(cell.v).match(/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/);
+        if (m) {
+          const d = new Date(+m[1], +m[2], +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+          return d.toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        }
+      }
+      return cell.f || String(cell.v || '');
     }
-  }
-});
-</script>
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function loadData() {
+      const icon = document.getElementById('refresh-icon');
+      icon.className = 'spin';
+
+      try {
+        const res  = await fetch(URL + '&_=' + Date.now());
+        const text = await res.text();
+        const json = JSON.parse(text.replace(/^[^\{]+/, '').replace(/[^\}]+$/, ''));
+        const cols = json.table.cols;
+        const rows = json.table.rows;
+
+        let tsCol = -1, confCol = -1;
+        cols.forEach((c, i) => {
+          const l = (c.label || '').toLowerCase();
+          if (l.includes('timestamp') || l.includes('time') || l.includes('date')) tsCol = i;
+          if (l.includes('confession') || l.includes('confess') || l.includes('message') || l.includes('text') || l.includes('response')) confCol = i;
+        });
+
+        if (tsCol   === -1) tsCol   = 0;
+        if (confCol === -1) confCol = cols.length > 1 ? 1 : 0;
+
+        const entries = rows
+          .map(r => ({
+            ts:   r.c[tsCol]   ? parseGVizDate(r.c[tsCol])   : '',
+            text: r.c[confCol] ? (r.c[confCol].f || r.c[confCol].v || '') : ''
+          }))
+          .filter(e => String(e.text).trim())
+          .reverse();
+
+        const feed = document.getElementById('feed');
+        if (!entries.length) {
+          feed.innerHTML = '<div class="empty-state">No confessions yet.</div>';
+        } else {
+          feed.innerHTML = entries.map((e, i) => `
+            <div class="card" style="animation-delay:${Math.min(i,10)*0.045}s">
+              <p class="card-text">${esc(e.text)}</p>
+              <div class="divider"></div>
+              <p class="card-meta">${esc(e.ts)}</p>
+            </div>
+          `).join('');
+        }
+
+        document.getElementById('count-label').textContent =
+          entries.length + ' confession' + (entries.length !== 1 ? 's' : '');
+
+      } catch(err) {
+        document.getElementById('feed').innerHTML = `
+          <div class="error-state">
+            Could not load confessions.
+            <small>Make sure the sheet is set to "Anyone with the link can view".</small>
+          </div>`;
+        document.getElementById('count-label').textContent = '';
+      } finally {
+        icon.className = '';
+      }
+    }
+
+    loadData();
+    setInterval(loadData, 30000);
+  </script>
 </body>
 </html>
